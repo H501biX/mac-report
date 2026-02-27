@@ -4,6 +4,9 @@
 #  Compatibile con qualsiasi Mac (Intel & Apple Silicon)
 # ============================================================
 
+export LC_ALL=C
+export LANG=C
+
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 OUTPUT_HTML="$HOME/Desktop/mac_report_${TIMESTAMP}.html"
 
