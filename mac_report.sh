@@ -160,13 +160,28 @@ fi
 # ============================================================
 
 # Raccolta da tutte le sorgenti
-declare -A APP_SOURCE  # nome app → sorgente
+# Usiamo un file temporaneo come dizionario (compatibile con bash 3.x di macOS)
+APP_SOURCE_FILE=$(mktemp /tmp/mac_report_src.XXXXXX)
+trap "rm -f $APP_SOURCE_FILE" EXIT
+
+# Funzione: salva "nome|sorgente" nel file
+app_set_source() {
+  local name="$1" src="$2"
+  # Rimuovi voce esistente e aggiungi la nuova
+  grep -v "^${name}|" "$APP_SOURCE_FILE" > "${APP_SOURCE_FILE}.tmp" 2>/dev/null && mv "${APP_SOURCE_FILE}.tmp" "$APP_SOURCE_FILE" || true
+  printf '%s|%s\n' "$name" "$src" >> "$APP_SOURCE_FILE"
+}
+# Funzione: leggi sorgente per nome
+app_get_source() {
+  local name="$1"
+  grep -m1 "^${name}|" "$APP_SOURCE_FILE" 2>/dev/null | cut -d'|' -f2-
+}
 
 # 1. App Store
 while IFS= read -r path; do
   [ -z "$path" ] && continue
   name=$(basename "$path" .app)
-  APP_SOURCE["$name"]="App Store"
+  app_set_source "$name" "App Store"
 done < <(mdfind "kMDItemAppStoreHasReceipt == 1" 2>/dev/null | grep "\.app$")
 
 # 2. Homebrew Cask
@@ -174,14 +189,13 @@ if command -v brew &>/dev/null; then
   BREW_INSTALLED=true
   while IFS= read -r cask; do
     [ -z "$cask" ] && continue
-    # Trova il nome dell'app associata al cask
     app_path=$(brew info --cask "$cask" 2>/dev/null | grep "\.app" | head -1 | grep -o '/[^)]*\.app' | head -1)
     if [ -n "$app_path" ]; then
       name=$(basename "$app_path" .app)
     else
       name="$cask"
     fi
-    APP_SOURCE["$name"]="Homebrew"
+    app_set_source "$name" "Homebrew"
   done < <(brew list --cask 2>/dev/null)
   BREW_CASK_COUNT=$(brew list --cask 2>/dev/null | wc -l | xargs)
   BREW_FORMULA_COUNT=$(brew list --formula 2>/dev/null | wc -l | xargs)
@@ -208,7 +222,7 @@ while IFS= read -r line; do
   APP_PATH=$(echo "$line" | awk '{$1=""; print $0}' | xargs)
   NAME=$(basename "$APP_PATH" .app)
 
-  SOURCE="${APP_SOURCE[$NAME]}"
+  SOURCE=$(app_get_source "$NAME")
   [ -z "$SOURCE" ] && SOURCE="Manuale / Web"
 
   case "$SOURCE" in
