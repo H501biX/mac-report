@@ -16,10 +16,10 @@
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
-║  MacBook Air 15" M3 / Apple Silicon                         ║
-║  ─────────────────────────────────────────────────────────  ║
-║  Hardware · Sicurezza · Spazio · App installate             ║
-║  Tipo installazione: 🛍️ App Store · 🍺 Homebrew · 🌐 Web   ║
+║            MacBook Air 15" M3 / Apple Silicon                ║
+║  ──────────────────────────────────────────────────────────  ║
+║       Hardware · Sicurezza · Spazio · App installate         ║
+║  Tipo installazione: 🛍️ App Store · 🍺 Homebrew · 🌐 Web      ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
 
